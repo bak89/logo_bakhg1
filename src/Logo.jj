@@ -50,7 +50,7 @@ PARSER_END(Logo)
 
 // skip separators
 SKIP : { <" " | "\t" | "\n" | "\r" > }
-TOKEN : { <HASH: "#"> }
+SKIP : { < "#" (~["\r", "\n"])* > }
 
 // Constants, pre-defined, operators etc.
 TOKEN: { <ADD: "+">   | <SUB: "-">  | <MUL: "*"> | <DIV: "/"> }
@@ -164,7 +164,6 @@ void subroutine():{Token functionName; boolean firstParameter = true; }
 
 
 void statement():{Token functionName; boolean firstParameter = true;}{
-"#"{indent();} comment() |
 <CLEARSCREEN>{indent();pw.println("logo.cs();");} |
 <PENDOWN> {indent(); pw.println("logo.pd();");} |
 <PENUP> {indent(); pw.println("logo.pu();");} |
@@ -215,12 +214,4 @@ t=<NUM>{pw.print(t.image);}
 
 void parameter():{Token p;}{
 p=<PARAMETER> {pw.print(p.image);}
-}
-
-void comment():{}{
-<HASH>{pw.print("//");} text_line()
-}
-
-void text_line():{Token c;}{
-c = <IDENTIFIER> {pw.print(c);}
 }
