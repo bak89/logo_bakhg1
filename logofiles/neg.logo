@@ -1,0 +1,11 @@
+LOGO NEG
+
+	 RT -60
+	 FD 100
+	 RT 60
+	 FD -(100)
+	 RT 60
+	 FD 10 - -90
+	 
+
+END
