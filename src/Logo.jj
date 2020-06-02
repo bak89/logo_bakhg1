@@ -131,13 +131,36 @@ void start() throws IOException:
      pw.flush(); pw.close(); }
    }
 
-void subroutine():{Token functionName; boolean firstParameter = true; }{
-<SUBROUTINE>{indent();pw.print("private void ");}
-functionName = <IDENTIFIER>{pw.print(functionName.image.toLowerCase()+"(");}
-({pw.print(firstParameter?"double ":", double ");firstParameter = false;}parameter() )*
-(statement())*
-<END>{numIndent--; indent(); pw.println(")");}
+void subroutine():{Token functionName; boolean firstParameter = true; }
+{
+    <SUBROUTINE> functionName = <IDENTIFIER>
+    {
+        indent();
+        pw.print("private void "+ functionName.image.toLowerCase() + "(");
+    }
+    (
+        {
+            pw.print(firstParameter?"double ":", double ");
+            firstParameter = false;
+        }
+        parameter()
+    )*
+    {
+        pw.print("){\n");
+        numIndent++;
+    }
+
+    ( statement() )*
+
+    "END"
+    {
+        numIndent--;
+        indent();
+        pw.println("}\n");
+    }
 }
+//<SUBROUTINE>{indent(); pw.println("private void ");} <IDENTIFIER> (parameter())* (statement())* <END>
+
 
 void statement():{Token functionName; boolean firstParameter = true;}{
 <CLEARSCREEN>{indent();pw.println("logo.cs();");} |
@@ -151,20 +174,20 @@ void statement():{Token functionName; boolean firstParameter = true;}{
 <RIGHTTURN> {indent(); pw.print("logo.rt(");} nexpr() {pw.println(");");} |
 <WAIT> {indent(); pw.println("logo.wait(");} nexpr() {pw.println(");");}|
 <REPEAT>{indent(); pw.print("for(int i = 0; i <= ");} nexpr() {pw.println("; i++){");numIndent++;} <LBRA>  (statement())* <RBRA> {numIndent--; indent();pw.println("}");} |
-<IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} /*|
-<IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|
-functionName = <IDENTIFIER>{indent();pw.print(functionName.image.toLowerCase()+"(");} ({pw.print(firstParameter?"":", "); firstParameter = false;} nexpr())* {firstParameter = true; pw.println(");");}
+<IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} |/*
+<IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|*/
+functionName = <IDENTIFIER>{indent();pw.print(functionName.image.toLowerCase()+"(");} ({pw.print(firstParameter?"":", "); firstParameter = false;} nexpr())* {firstParameter = true; pw.println(");");}/*
 <REPEAT>{indent(); iteration++; pw.print("for(int i"+ iteration+" =1; i"+iteration+" <= ");} nexpr() {pw.println("; i"+iteration+"++){");numIndent++;}"["  (statement())* "]"{numIndent--; indent();pw.println("}");} |
 */
 }
 
 
-void nexpr():{}{
-nterm() ((<ADD> | <SUB> ) nterm())*
+void nexpr():{Token operator;}{
+nterm() ((operator=<ADD>{pw.print(operator.image);} | operator=<SUB>{pw.print(operator.image);} ) nterm())*
 }
 
-void nterm():{}{
-nfactor() (( <MUL> | <DIV>) nfactor())*
+void nterm():{Token operator;}{
+nfactor() ((operator=<MUL>{pw.print(operator.image);} | operator=<DIV>{pw.print(operator.image);}) nfactor())*
 }
 
 void nfactor():{}{
@@ -181,7 +204,7 @@ bfactor() ("AND" bfactor() ) *
 
 void bfactor():{Token b;}{
 b="TRUE"{pw.print(b.image);} | b="FALSE"{pw.print(b.image);} | "NOT" "(" bexpr() ")"
-	   | nexpr() ( "==" | "!=" | "<" | ">" | "<=" | ">=" )  nexpr()
+	   | nexpr() ( b="=="{pw.print(b.image);} | b="!="{pw.print(b.image);}| b="<"{pw.print(b.image);}| b=">"{pw.print(b.image);} | b="<="{pw.print(b.image);} | b=">="{pw.print(b.image);} )  nexpr()
 }
 
 void number():{Token t;}{

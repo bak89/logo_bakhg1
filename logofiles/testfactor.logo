@@ -1,0 +1,6 @@
+LOGO FACTOR
+    FD 1 + 2
+    FD 1 * 1
+    FD 1 - 1
+    FD 1 / 1
+END
