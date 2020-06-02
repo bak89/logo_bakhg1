@@ -50,6 +50,7 @@ PARSER_END(Logo)
 
 // skip separators
 SKIP : { <" " | "\t" | "\n" | "\r" > }
+TOKEN : { <HASH: "#"> }
 
 // Constants, pre-defined, operators etc.
 TOKEN: { <ADD: "+">   | <SUB: "-">  | <MUL: "*"> | <DIV: "/"> }
@@ -163,6 +164,7 @@ void subroutine():{Token functionName; boolean firstParameter = true; }
 
 
 void statement():{Token functionName; boolean firstParameter = true;}{
+"#"{indent();} comment() |
 <CLEARSCREEN>{indent();pw.println("logo.cs();");} |
 <PENDOWN> {indent(); pw.println("logo.pd();");} |
 <PENUP> {indent(); pw.println("logo.pu();");} |
@@ -174,8 +176,8 @@ void statement():{Token functionName; boolean firstParameter = true;}{
 <RIGHTTURN> {indent(); pw.print("logo.rt(");} nexpr() {pw.println(");");} |
 <WAIT> {indent(); pw.println("logo.wait(");} nexpr() {pw.println(");");}|
 <REPEAT>{indent(); pw.print("for(int i = 0; i <= ");} nexpr() {pw.println("; i++){");numIndent++;} <LBRA>  (statement())* <RBRA> {numIndent--; indent();pw.println("}");} |
-<IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} |/*
-<IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|*/
+<IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} |
+<IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|
 functionName = <IDENTIFIER>{indent();pw.print(functionName.image.toLowerCase()+"(");} ({pw.print(firstParameter?"":", "); firstParameter = false;} nexpr())* {firstParameter = true; pw.println(");");}/*
 <REPEAT>{indent(); iteration++; pw.print("for(int i"+ iteration+" =1; i"+iteration+" <= ");} nexpr() {pw.println("; i"+iteration+"++){");numIndent++;}"["  (statement())* "]"{numIndent--; indent();pw.println("}");} |
 */
@@ -213,4 +215,12 @@ t=<NUM>{pw.print(t.image);}
 
 void parameter():{Token p;}{
 p=<PARAMETER> {pw.print(p.image);}
+}
+
+void comment():{}{
+<HASH>{pw.print("//");} text_line()
+}
+
+void text_line():{Token c;}{
+c = <IDENTIFIER> {pw.print(c);}
 }
