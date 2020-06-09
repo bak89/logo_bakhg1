@@ -21,6 +21,7 @@ public class Logo {
   static private File javaFile, htmlFile;   // output files
   static private PrintWriter pw;            // printwriter used for every output
   static private int numIndent = 0;         // size of indentation
+  static private int counter = 0;
 
   // to pretty-print the translation
   // uses numIndent and pw defined as static variables in LogoParser
@@ -102,11 +103,14 @@ void start() throws IOException:
      javaFile = new File(t.image.toLowerCase() + ".java");
      pw = new PrintWriter(new FileOutputStream(javaFile));
      pw.println("import java.awt.Graphics;\n");
+     //pw.println("import java.util.*;\n");
      pw.println("public class " + t.image.toLowerCase() +
                 " extends java.applet.Applet {\n" );
      numIndent++;
      indent();
      pw.println("private LogoPrimitives logo;\n");
+     //indent();
+     //pw.println("private Stack<Integer> repcount = new Stack<Integer>();\n");//qui va repcount
      pw.flush();
    }
   ( subroutine() )*
@@ -117,6 +121,8 @@ void start() throws IOException:
      indent();
      pw.println("logo = new LogoPrimitives(this);");
      pw.println();
+     indent();
+     pw.println("int REPCOUNT = 0;");
    }
   ( statement() )*
 // close the method "paint"
@@ -173,13 +179,15 @@ void statement():{Token functionName; boolean firstParameter = true;}{
 <BACKWARD> {indent(); pw.print("logo.bk(");} nexpr() {pw.println(");");} |
 <LEFTTURN> {indent(); pw.print("logo.lt(");} nexpr() {pw.println(");");} |
 <RIGHTTURN> {indent(); pw.print("logo.rt(");} nexpr() {pw.println(");");} |
-<WAIT> {indent(); pw.println("logo.wait(");} nexpr() {pw.println(");");}|
-<REPEAT>{indent(); pw.print("for(int i = 0; i <= ");} nexpr() {pw.println("; i++){");numIndent++;} <LBRA>  (statement())* <RBRA> {numIndent--; indent();pw.println("}");} |
+<WAIT> {indent(); pw.print("logo.wait(");} nexpr() {pw.println(");");}|
+<REPEAT>{indent(); counter++; pw.print("for(int i"+ counter+" = 0; i"+counter+" <= ");} nexpr() {pw.println("; i"+counter+"++){");numIndent++;
+indent();
+pw.println("REPCOUNT = i"+counter+";" );
+}"["  (statement())* "]"{numIndent--; counter--; indent();pw.println("}"); pw.println("REPCOUNT--;");} |
+
 <IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} |
 <IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|
-functionName = <IDENTIFIER>{indent();pw.print(functionName.image.toLowerCase()+"(");} ({pw.print(firstParameter?"":", "); firstParameter = false;} nexpr())* {firstParameter = true; pw.println(");");}/*
-<REPEAT>{indent(); iteration++; pw.print("for(int i"+ iteration+" =1; i"+iteration+" <= ");} nexpr() {pw.println("; i"+iteration+"++){");numIndent++;}"["  (statement())* "]"{numIndent--; indent();pw.println("}");} |
-*/
+functionName = <IDENTIFIER>{indent();pw.print(functionName.image.toLowerCase()+"(");} ({pw.print(firstParameter?"":", "); firstParameter = false;} nexpr())* {firstParameter = true; pw.println(");");}
 }
 
 
@@ -192,7 +200,7 @@ nfactor() ((operator=<MUL>{pw.print(operator.image);} | operator=<DIV>{pw.print(
 }
 
 void nfactor():{}{
-<SUB> ( number() | <REPCOUNT> | parameter() | "(" nexpr() ")" ) | number() | <REPCOUNT> | parameter() | "(" nexpr() ")"
+<SUB> ( number() | repcount() | parameter() | "(" nexpr() ")" ) | number() | repcount() | parameter() | "(" nexpr() ")"
 }
 
 void bexpr():{}{
@@ -204,7 +212,7 @@ bfactor() ("AND" bfactor() ) *
 }
 
 void bfactor():{Token b;}{
-b="TRUE"{pw.print(b.image);} | b="FALSE"{pw.print(b.image);} | "NOT" "(" bexpr() ")"
+b="TRUE"{pw.print(b.image);} | b="FALSE"{pw.print(b.image);} | b="NOT"{pw.print(b.image);} "(" bexpr() ")"
 	   | nexpr() ( b="=="{pw.print(b.image);} | b="!="{pw.print(b.image);}| b="<"{pw.print(b.image);}| b=">"{pw.print(b.image);} | b="<="{pw.print(b.image);} | b=">="{pw.print(b.image);} )  nexpr()
 }
 
@@ -214,4 +222,8 @@ t=<NUM>{pw.print(t.image);}
 
 void parameter():{Token p;}{
 p=<PARAMETER> {pw.print(p.image);}
+}
+
+void repcount():{Token r;}{
+r = <REPCOUNT> {pw.print(r.image);}
 }
