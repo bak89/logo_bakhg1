@@ -109,8 +109,6 @@ void start() throws IOException:
      numIndent++;
      indent();
      pw.println("private LogoPrimitives logo;\n");
-     //indent();
-     //pw.println("private Stack<Integer> repcount = new Stack<Integer>();\n");//qui va repcount
      pw.flush();
    }
   ( subroutine() )*
@@ -123,6 +121,7 @@ void start() throws IOException:
      pw.println();
      indent();
      pw.println("int REPCOUNT = 0;");
+     pw.println();
    }
   ( statement() )*
 // close the method "paint"
@@ -166,8 +165,6 @@ void subroutine():{Token functionName; boolean firstParameter = true; }
         pw.println("}\n");
     }
 }
-//<SUBROUTINE>{indent(); pw.println("private void ");} <IDENTIFIER> (parameter())* (statement())* <END>
-
 
 void statement():{Token functionName; boolean firstParameter = true;}{
 <CLEARSCREEN>{indent();pw.println("logo.cs();");} |
@@ -183,7 +180,8 @@ void statement():{Token functionName; boolean firstParameter = true;}{
 <REPEAT>{indent(); counter++; pw.print("for(int i"+ counter+" = 0; i"+counter+" <= ");} nexpr() {pw.println("; i"+counter+"++){");numIndent++;
 indent();
 pw.println("REPCOUNT = i"+counter+";" );
-}"["  (statement())* "]"{numIndent--; counter--; indent();pw.println("}"); pw.println("REPCOUNT--;");} |
+}
+"["  (statement())* "]"{numIndent--; counter--; indent();pw.println("}"); indent(); pw.println("REPCOUNT--;");} |
 
 <IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} |
 <IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|

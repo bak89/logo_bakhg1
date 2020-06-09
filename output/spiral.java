@@ -5,8 +5,9 @@ public class spiral extends java.applet.Applet {
    private LogoPrimitives logo;
 
    private void spiral(double TIMES, double ANGLE){
-      for(int i = 0; i <= TIMES; i++){
-         logo.fd(TIMES-+1);
+      for(int i1 =0; i1 <= TIMES; i1++){
+int REPCOUNT = i1;
+         logo.fd(TIMES-REPCOUNT+1);
          logo.rt(ANGLE);
       }
    }
