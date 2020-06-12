@@ -22,13 +22,14 @@ https://javacc.github.io/javac/
 
 ### How it works: 
 
-Modify the build.properties file with what you want to parse
+Modify the build.properties file with what you want to parse, just the filename (e.g.: "filename=demo")
 
 From command line launch:
 ```
 ant clean
 ant parser
 ant compile
+ant run
 ```
 
 
