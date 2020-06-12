@@ -1,15 +1,15 @@
 import java.awt.Graphics;
 
-public class triangle extends java.applet.Applet {
+public class pentagon extends java.applet.Applet {
 
    private LogoPrimitives logo;
 
    public void paint(Graphics g) {
       logo = new LogoPrimitives(this);
 
-      for(int i1 = 0; i1 <= 3; i1++){
+      for(int i1 = 0; i1 <= 5; i1++){
          logo.fd(100);
-         logo.rt(120);
+         logo.rt(72);
       }
    }
 }

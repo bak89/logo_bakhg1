@@ -119,9 +119,6 @@ void start() throws IOException:
      indent();
      pw.println("logo = new LogoPrimitives(this);");
      pw.println();
-     indent();
-     pw.println("int REPCOUNT = 0;");
-     pw.println();
    }
   ( statement() )*
 // close the method "paint"
@@ -138,6 +135,8 @@ void start() throws IOException:
    }
 
 void subroutine():{Token functionName; boolean firstParameter = true; }
+
+// define the TO function as a identifer
 {
     <SUBROUTINE> functionName = <IDENTIFIER>
     {
@@ -167,34 +166,174 @@ void subroutine():{Token functionName; boolean firstParameter = true; }
 }
 
 void statement():{Token functionName; boolean firstParameter = true;}{
-<CLEARSCREEN>{indent();pw.println("logo.cs();");} |
-<PENDOWN> {indent(); pw.println("logo.pd();");} |
-<PENUP> {indent(); pw.println("logo.pu();");} |
-<HIDETURTLE> {indent(); pw.println("logo.ht();");} |
-<SHOWTURTLE> {indent(); pw.println("logo.st();");} |
-<FORWARD> {indent(); pw.print("logo.fd(");} nexpr() {pw.println(");");}|
-<BACKWARD> {indent(); pw.print("logo.bk(");} nexpr() {pw.println(");");} |
-<LEFTTURN> {indent(); pw.print("logo.lt(");} nexpr() {pw.println(");");} |
-<RIGHTTURN> {indent(); pw.print("logo.rt(");} nexpr() {pw.println(");");} |
-<WAIT> {indent(); pw.print("logo.wait(");} nexpr() {pw.println(");");}|
-<REPEAT>{indent(); counter++; pw.print("for(int i"+ counter+" = 0; i"+counter+" <= ");} nexpr() {pw.println("; i"+counter+"++){");numIndent++;
-indent();
-pw.println("REPCOUNT = i"+counter+";" );
-}
-"["  (statement())* "]"{numIndent--; counter--; indent();pw.println("}"); indent(); pw.println("REPCOUNT--;");} |
 
-<IF> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} <LBRA> (statement())* <RBRA> {numIndent--; indent(); pw.println("}");} |
-<IFELSE> {indent(); pw.print("if("); } bexpr() {pw.print("){"); numIndent++;} "[" (statement())* "]" {numIndent--; indent();pw.println("}"); indent(); pw.println("else{");numIndent++;} "[" (statement())* "]" {numIndent--; indent(); pw.println("}");}|
-functionName = <IDENTIFIER>{indent();pw.print(functionName.image.toLowerCase()+"(");} ({pw.print(firstParameter?"":", "); firstParameter = false;} nexpr())* {firstParameter = true; pw.println(");");}
+// clear screen statement
+<CLEARSCREEN>{
+    indent();
+    pw.println("logo.cs();");
+    } |
+
+// pendown statement
+<PENDOWN> {
+    indent();
+    pw.println("logo.pd();");
+    } |
+
+// penup statement
+<PENUP> {
+    indent();
+    pw.println("logo.pu();");
+    } |
+
+// hideturtle statement
+<HIDETURTLE> {
+    indent();
+    pw.println("logo.ht();");
+    } |
+
+// showturtle statement
+<SHOWTURTLE> {
+    indent();
+    pw.println("logo.st();");
+    } |
+
+// forward statement
+<FORWARD> {
+    indent();
+    pw.print("logo.fd(");
+    }
+    nexpr()
+    {
+    pw.println(");");
+    }|
+
+// backward statement
+<BACKWARD> {
+    indent();
+    pw.print("logo.bk(");
+    }
+    nexpr()
+    {
+    pw.println(");");
+    }|
+
+// left turn statement
+<LEFTTURN> {
+    indent();
+    pw.print("logo.lt(");
+    }
+    nexpr()
+    {
+    pw.println(");");
+    }|
+
+// right turn statement
+<RIGHTTURN> {
+    indent();
+    pw.print("logo.rt(");
+    }
+    nexpr()
+    {
+    pw.println(");");
+    }|
+
+// wait statement
+<WAIT> {
+    indent();
+    pw.print("logo.wait(");
+    }
+    nexpr()
+    {
+    pw.println(");");
+    }|
+
+// repeat statement
+<REPEAT>{
+    indent();
+    counter++;
+    pw.print("for(int i"+ counter+" = 0; i"+counter+" <= ");
+    }
+    nexpr()
+    {
+    pw.println("; i"+counter+"++){");
+    numIndent++;
+    }
+    "[" (statement())* "]"{
+    numIndent--;
+    counter--;
+    indent();
+    pw.println("}");
+    }|
+
+// if statement
+<IF>{
+    indent();
+    pw.print("if(");
+    }
+    bexpr()
+    {
+    pw.print("){");
+    numIndent++;
+    }
+    <LBRA> (statement())* <RBRA> {
+    numIndent--;
+    indent();
+    pw.println("}");
+    }|
+
+// if-else statement
+<IFELSE>{
+    indent();
+    pw.print("if(");
+    }
+    bexpr()
+    {
+    pw.print("){");
+    numIndent++;
+    }
+    "[" (statement())* "]" {
+    numIndent--;
+    indent();
+    pw.println("}");
+    indent();
+    pw.println("else{");
+    numIndent++;
+    }
+    "[" (statement())* "]" {
+    numIndent--;
+    indent();
+    pw.println("}");
+    }|
+
+// identifer statement
+functionName = <IDENTIFIER>{
+    indent();
+    pw.print(functionName.image.toLowerCase()+"(");
+    }
+    (
+        {
+            pw.print(firstParameter?"":", ");
+            firstParameter = false;
+        }
+        nexpr()
+    )*
+    {
+    firstParameter = true;
+    pw.println(");");
+    }
 }
 
 
 void nexpr():{Token operator;}{
-nterm() ((operator=<ADD>{pw.print(operator.image);} | operator=<SUB>{pw.print(operator.image);} ) nterm())*
+nterm() ((operator=<ADD>{pw.print(operator.image);} |
+          operator=<SUB>{pw.print(operator.image);} )
+          nterm())*
 }
 
 void nterm():{Token operator;}{
-nfactor() ((operator=<MUL>{pw.print(operator.image);} | operator=<DIV>{pw.print(operator.image);}) nfactor())*
+nfactor() ((operator=<MUL>{pw.print(operator.image);} |
+            operator=<DIV>{pw.print(operator.image);})
+            nfactor())*
 }
 
 void nfactor():{}{
@@ -210,8 +349,16 @@ bfactor() ("AND" bfactor() ) *
 }
 
 void bfactor():{Token b;}{
-b="TRUE"{pw.print(b.image);} | b="FALSE"{pw.print(b.image);} | b="NOT"{pw.print(b.image);} "(" bexpr() ")"
-	   | nexpr() ( b="=="{pw.print(b.image);} | b="!="{pw.print(b.image);}| b="<"{pw.print(b.image);}| b=">"{pw.print(b.image);} | b="<="{pw.print(b.image);} | b=">="{pw.print(b.image);} )  nexpr()
+b="TRUE"{pw.print(b.image);} |
+    b="FALSE"{pw.print(b.image);} |
+    b="NOT"{pw.print(b.image);} "(" bexpr() ")" |
+    nexpr() ( b="=="{pw.print(b.image);} |
+    b="!="{pw.print(b.image);}|
+    b="<"{pw.print(b.image);}|
+    b=">"{pw.print(b.image);} |
+    b="<="{pw.print(b.image);} |
+    b=">="{pw.print(b.image);} )
+    nexpr()
 }
 
 void number():{Token t;}{
@@ -223,5 +370,5 @@ p=<PARAMETER> {pw.print(p.image);}
 }
 
 void repcount():{Token r;}{
-r = <REPCOUNT> {pw.print(r.image);}
+<REPCOUNT> {pw.print("i" + counter + "");}
 }
