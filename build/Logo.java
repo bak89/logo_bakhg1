@@ -254,7 +254,7 @@ pw.println(");");
         jj_consume_token(REPEAT);
 indent();
     counter++;
-    pw.print("for(int i"+ counter+" = 0; i"+counter+" <= ");
+    pw.print("for(int i"+ counter+" = 0; i"+counter+" < ");
         nexpr();
 pw.println("; i"+counter+"++){");
     numIndent++;
