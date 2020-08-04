@@ -1,0 +1,16 @@
+Evaluation of Project Logo
+==========================
+
+Compile and run:  OK
+
+Implementation: good
+
+I found an error:  the REPEAT does one extra loop, which change a lot the drawing.
+
+(-2)
+
+Report: good
+
+good job
+
+Total: 23/25
